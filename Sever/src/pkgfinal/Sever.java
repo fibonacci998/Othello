@@ -41,7 +41,29 @@ public class Sever {
 
     //MenuBar
     MenuBar menubar;
-
+    int checkWin(){
+        int countRed=0,countBlack=0,countHint=0;
+        for (int i=0;i<8;i++){
+            for (int j=0;j<8;j++){
+                if (bt[i][j].getBackground()==Color.RED) countRed++;
+                if (bt[i][j].getBackground()==Color.BLACK) countBlack++;
+                if (bt[i][j].getBackground()==Color.YELLOW) countHint++;
+            }
+        }
+        if (countRed+countBlack==64){
+            if (countRed>countBlack){
+                return 1;
+            }
+            if (countRed<countBlack){
+                return 2;
+            }
+            return 3;
+        }
+        if (countHint==0){
+            return 4;
+        }
+        return 0;
+    }
     public Sever() {
         f = new JFrame();
         f.setTitle("Game Caro Sever");
@@ -246,8 +268,7 @@ public class Sever {
                         flat = true;// server da click
                         //thoigian.start();
                         second = 0;
-                        minute = 0;
-                        
+                        minute = 0;                        
                         boolean check=false;
                         //bt[a][b].setIcon(new ImageIcon(getClass().getResource("dark.png")));
                         if(bt[a][b].getBackground()!= Color.RED && bt[a][b].getBackground()!= Color.BLACK){
@@ -274,6 +295,14 @@ public class Sever {
                                 matrandanh[a][b] = 1;
                                 bt[a][b].setEnabled(false);
                                 bt[a][b].setBackground(Color.RED);
+                                for (int i=0;i<8;i++){
+                                    for (int j=0;j<8;j++){
+
+                                    if (bt[i][j].getBackground()==Color.YELLOW){
+                                            bt[i][j].setBackground(Color.LIGHT_GRAY);
+                                        }
+                                    }
+                                }
                             }
                             
                         }
@@ -281,6 +310,8 @@ public class Sever {
                             try {
                                 oos.writeObject("caro," + a + "," + b+",");
                                 setEnableButton(false);
+                                int stt=checkWin();
+                                JOptionPane.showMessageDialog(f, stt);
                             } catch (Exception ie) {
                                 ie.printStackTrace();
                             }
@@ -299,6 +330,18 @@ public class Sever {
         bt[3][4].setBackground(Color.BLACK);
         bt[4][3].setBackground(Color.BLACK);
         bt[4][4].setBackground(Color.RED);
+        for (int i=0;i<8;i++){
+            for (int j=0;j<8;j++){
+                int dx[]={-1,-1,-1,0,0,1,1,1};
+                int dy[]={-1,0,1,-1,1,-1,0,1};
+                for (int direction=0;direction<8;direction++){
+                    if (InBoard(i+dx[direction], j+dy[direction]) && bt[i][j].getBackground()==Color.LIGHT_GRAY
+                            && (validMove1(i+dx[direction], j+dy[direction],dx[direction],dy[direction]))){
+                        bt[i][j].setBackground(Color.YELLOW);
+                    }
+                }
+            }
+        }
         try {
             serversocket = new ServerSocket(1234);
             System.out.println("Dang doi client...");
@@ -354,6 +397,18 @@ public class Sever {
         setEnableButton(true);
         second = 0;
         minute = 0;
+        for (int i=0;i<8;i++){
+            for (int j=0;j<8;j++){
+                for (int direction=0;direction<8;direction++){
+                    int dx[]={-1,-1,-1,0,0,1,1,1};
+                    int dy[]={-1,0,1,-1,1,-1,0,1};
+                    if (InBoard(i+dx[direction], j+dy[direction]) && bt[i][j].getBackground()==Color.LIGHT_GRAY 
+                            && (validMove1(i+dx[direction], j+dy[direction],dx[direction],dy[direction]))){
+                        bt[i][j].setBackground(Color.YELLOW);
+                    }
+                }
+            }
+        }
         //thoigian.stop();
     }
 
@@ -397,6 +452,26 @@ public class Sever {
         }
         return false;
     }
+    public boolean validMove1(int xPos,int yPos,int xDirection,int yDirection){
+        if (!InBoard(xPos, yPos)) return false;
+        if (bt[xPos][yPos].getBackground()==Color.BLACK){
+            while (true){
+                if (InBoard(xPos+xDirection, yPos+yDirection)){
+                    xPos+=xDirection;
+                    yPos+=yDirection;
+                    if (bt[xPos][yPos].getBackground()==Color.RED){
+                        return true;
+                    }
+                    if (InBoard(xPos,yPos)&& bt[xPos][yPos].getBackground()!=Color.BLACK){
+                                        break;
+                                    }
+                } else{
+                    break;
+                }
+            }
+        }
+        return false;
+    }
     public void caro(String x, String y) {
         xx = Integer.parseInt(x);
         yy = Integer.parseInt(y);
@@ -427,6 +502,18 @@ public class Sever {
         //bt[xx][yy].setIcon(new ImageIcon("x.png"));
         bt[xx][yy].setBackground(Color.BLACK);
 
+        for (int i=0;i<8;i++){
+            for (int j=0;j<8;j++){
+                for (int direction=0;direction<8;direction++){
+                    if (InBoard(i+dx[direction], j+dy[direction]) && bt[i][j].getBackground()==Color.LIGHT_GRAY 
+                            && (validMove1(i+dx[direction], j+dy[direction],dx[direction],dy[direction]))){
+                        bt[i][j].setBackground(Color.YELLOW);
+                    }
+                }
+            }
+        }
+        int stt=checkWin();
+        JOptionPane.showMessageDialog(f, stt);
     }
 
     private void printTable() {

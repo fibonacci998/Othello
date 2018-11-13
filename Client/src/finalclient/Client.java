@@ -38,7 +38,29 @@ public class Client {
 
     //MenuBar
     MenuBar menubar;
-
+    int checkWin(){
+        int countRed=0,countBlack=0,countHint=0;
+        for (int i=0;i<8;i++){
+            for (int j=0;j<8;j++){
+                if (bt[i][j].getBackground()==Color.RED) countRed++;
+                if (bt[i][j].getBackground()==Color.BLACK) countBlack++;
+                if (bt[i][j].getBackground()==Color.YELLOW) countHint++;
+            }
+        }
+        if (countRed+countBlack==64){
+            if (countRed>countBlack){
+                return 1;
+            }
+            if (countRed<countBlack){
+                return 2;
+            }
+            return 3;
+        }
+        if (countHint==0){
+            return 4;
+        }
+        return 0;
+    }
     public Client() {
         f = new JFrame();
         f.setTitle("Game Caro Client");
@@ -275,12 +297,23 @@ public class Client {
                                 matrandanh[a][b] = 1;
                                 bt[a][b].setEnabled(false);
                                 bt[a][b].setBackground(Color.BLACK);
+                                
+                                for (int i=0;i<8;i++){
+                                    for (int j=0;j<8;j++){
+
+                                    if (bt[i][j].getBackground()==Color.YELLOW){
+                                            bt[i][j].setBackground(Color.LIGHT_GRAY);
+                                        }
+                                    }
+                                }
                             }
                         }
                         if (check){
                             try {
                                 oos.writeObject("caro," + a + "," + b);
                                 setEnableButton(false);
+                                int stt=checkWin();
+                                JOptionPane.showMessageDialog(f, stt);
                             } catch (Exception ie) {
                                 ie.printStackTrace();
                             }
@@ -298,6 +331,19 @@ public class Client {
         bt[3][4].setBackground(Color.BLACK);
         bt[4][3].setBackground(Color.BLACK);
         bt[4][4].setBackground(Color.RED);
+        for (int i=0;i<8;i++){
+            for (int j=0;j<8;j++){
+                int dx[]={-1,-1,-1,0,0,1,1,1};
+                int dy[]={-1,0,1,-1,1,-1,0,1};
+                for (int direction=0;direction<8;direction++){
+                    if (InBoard(i+dx[direction], j+dy[direction]) && bt[i][j].getBackground()==Color.LIGHT_GRAY
+                            && (validMove1(i+dx[direction], j+dy[direction],dx[direction],dy[direction]))){
+                        bt[i][j].setBackground(Color.YELLOW);
+                    }
+                }
+            }
+        }
+        
         try {
             socket = new Socket("127.0.0.1", 1234);
             System.out.println("Da ket noi toi server!");
@@ -335,6 +381,26 @@ public class Client {
 
     }
 
+    public boolean validMove1(int xPos,int yPos,int xDirection,int yDirection){
+        if (!InBoard(xPos, yPos)) return false;
+        if (bt[xPos][yPos].getBackground()==Color.RED){
+            while (true){
+                if (InBoard(xPos+xDirection, yPos+yDirection)){
+                    xPos+=xDirection;
+                    yPos+=yDirection;
+                    if (bt[xPos][yPos].getBackground()==Color.BLACK){
+                        return true;
+                    }
+                    if (InBoard(xPos,yPos)&& bt[xPos][yPos].getBackground()!=Color.RED){
+                                        break;
+                                    }
+                } else{
+                    break;
+                }
+            }
+        }
+        return false;
+    }
     public void newgame() {
         for (int i = 0; i < x; i++) {
             for (int j = 0; j < y; j++) {
@@ -346,6 +412,18 @@ public class Client {
         setEnableButton(true);
         second = 0;
         minute = 0;
+        for (int i=0;i<8;i++){
+            for (int j=0;j<8;j++){
+                for (int direction=0;direction<8;direction++){
+                    int dx[]={-1,-1,-1,0,0,1,1,1};
+                    int dy[]={-1,0,1,-1,1,-1,0,1};
+                    if (InBoard(i+dx[direction], j+dy[direction]) && bt[i][j].getBackground()==Color.LIGHT_GRAY 
+                            && (validMove1(i+dx[direction], j+dy[direction],dx[direction],dy[direction]))){
+                        bt[i][j].setBackground(Color.YELLOW);
+                    }
+                }
+            }
+        }
         //thoigian.stop();
     }
 
@@ -419,7 +497,19 @@ public class Client {
         bt[xx][yy].setEnabled(false);
         //bt[xx][yy].setIcon(new ImageIcon("x.png"));
         bt[xx][yy].setBackground(Color.RED);
-
+        
+        for (int i=0;i<8;i++){
+            for (int j=0;j<8;j++){
+                for (int direction=0;direction<8;direction++){
+                    if (InBoard(i+dx[direction], j+dy[direction]) && bt[i][j].getBackground()==Color.LIGHT_GRAY 
+                            && (validMove1(i+dx[direction], j+dy[direction],dx[direction],dy[direction]))){
+                        bt[i][j].setBackground(Color.YELLOW);
+                    }
+                }
+            }
+        }
+        int stt=checkWin();
+        JOptionPane.showMessageDialog(f, stt);
     }
 
     public static void main(String[] args) {
