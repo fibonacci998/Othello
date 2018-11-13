@@ -17,7 +17,7 @@ public class Client {
     JTextArea content;
     JTextField nhap, enterchat;
     JButton send;
-    Timer thoigian;
+    //Timer thoigian;
     Integer second, minute;
     JLabel demthoigian;
     TextField textField;
@@ -161,49 +161,49 @@ public class Client {
         demthoigian.setBounds(430, 120, 300, 50);
         second = 0;
         minute = 0;
-        thoigian = new Timer(1000, new ActionListener() {
-
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                String temp = minute.toString();
-                String temp1 = second.toString();
-                if (temp.length() == 1) {
-                    temp = "0" + temp;
-                }
-                if (temp1.length() == 1) {
-                    temp1 = "0" + temp1;
-                }
-
-                if (second == 10) {
-                    try {
-                        oos.writeObject("checkwin,123");
-                    } catch (IOException ex) {
-                    }
-                    Object[] options = {"Dong y", "Huy bo"};
-                    int m = JOptionPane.showConfirmDialog(f,
-                            "Ban da thua.Ban co muon choi lai khong?", "Thong bao",
-                            JOptionPane.YES_NO_OPTION);
-                    if (m == JOptionPane.YES_OPTION) {
-                        second = 0;
-                        minute = 0;
-                        setVisiblePanel(p);
-                        newgame();
-                        try {
-                            oos.writeObject("newgame,123");
-                        } catch (IOException ie) {
-                            //
-                        }
-                    } else if (m == JOptionPane.NO_OPTION) {
-                        thoigian.stop();
-                    }
-                } else {
-                    demthoigian.setText("Thời Gian:" + temp + ":" + temp1);
-                    second++;
-                }
-
-            }
-
-        });
+//        thoigian = new Timer(1000, new ActionListener() {
+//
+//            @Override
+//            public void actionPerformed(ActionEvent e) {
+//                String temp = minute.toString();
+//                String temp1 = second.toString();
+//                if (temp.length() == 1) {
+//                    temp = "0" + temp;
+//                }
+//                if (temp1.length() == 1) {
+//                    temp1 = "0" + temp1;
+//                }
+//
+//                if (second == 10) {
+//                    try {
+//                        oos.writeObject("checkwin,123");
+//                    } catch (IOException ex) {
+//                    }
+//                    Object[] options = {"Dong y", "Huy bo"};
+//                    int m = JOptionPane.showConfirmDialog(f,
+//                            "Ban da thua.Ban co muon choi lai khong?", "Thong bao",
+//                            JOptionPane.YES_NO_OPTION);
+//                    if (m == JOptionPane.YES_OPTION) {
+//                        second = 0;
+//                        minute = 0;
+//                        setVisiblePanel(p);
+//                        newgame();
+//                        try {
+//                            oos.writeObject("newgame,123");
+//                        } catch (IOException ie) {
+//                            //
+//                        }
+//                    } else if (m == JOptionPane.NO_OPTION) {
+//                        thoigian.stop();
+//                    }
+//                } else {
+//                    demthoigian.setText("Thời Gian:" + temp + ":" + temp1);
+//                    second++;
+//                }
+//
+//            }
+//
+//        });
 
         bt = new JButton[x][y];
         for (int i = 0; i < x; i++) {
@@ -213,34 +213,43 @@ public class Client {
                 bt[a][b].setBackground(Color.LIGHT_GRAY);
                 bt[a][b].addActionListener(new ActionListener() {
                     public boolean InBoard(int xPos,int yPos){
-                        return (0<=xPos && xPos<=x && 0<=yPos && yPos<=y);
+                        return (0<=xPos && xPos<x && 0<=yPos && yPos<y);
                     }
                     public boolean validMove(int xPos,int yPos,int xDirection,int yDirection){
-                        if (bt[xPos][yPos].getBackground()==Color.RED){
+                        try{
+                            if (!InBoard(xPos, yPos)) return false;
+                            if (bt[xPos][yPos].getBackground()==Color.RED){
                             while (true){
                                 if (InBoard(xPos+xDirection, yPos+yDirection)){
                                     xPos+=xDirection;
                                     yPos+=yDirection;
-                                    if (bt[xPos][yPos].getBackground()==Color.BLACK){
+                                    if (InBoard(xPos,yPos)&& bt[xPos][yPos].getBackground()==Color.BLACK){
                                         return true;
                                     }
-                                } else{
-                                    break;
+                                    if (InBoard(xPos,yPos)&& bt[xPos][yPos].getBackground()!=Color.RED){
+                                        break;
+                                    }
+                                    } else{
+                                        break;
+                                    }
                                 }
                             }
+                            return false;
+                        }catch(Exception e){
+                            e.printStackTrace();
                         }
                         return false;
                     }
                     @Override
                     public void actionPerformed(ActionEvent e) {
                         flat = true;// server da click
-                        thoigian.start();
+                        //thoigian.start();
 
                         second = 0;
                         minute = 0;
 
-                        matrandanh[a][b] = 1;
-                        bt[a][b].setEnabled(false);
+                        
+                        boolean check=false;
                         //bt[a][b].setIcon(new ImageIcon(getClass().getResource("o.png")));
                         if(bt[a][b].getBackground()!= Color.RED && bt[a][b].getBackground()!= Color.BLACK){
                             int dx[]={-1,-1,-1,0,0,1,1,1};
@@ -251,23 +260,32 @@ public class Client {
                                     int xPos=a,yPos=b,xDirection=dx[direction],yDirection=dy[direction];
                                     while (true){
                                         bt[xPos][yPos].setBackground(Color.BLACK);
+                                        matrandanh[xPos][yPos] = 1;
+                                        bt[xPos][xPos].setEnabled(false);
                                         xPos+=xDirection;
                                         yPos+=yDirection;
                                         if (bt[xPos][yPos].getBackground()==Color.BLACK){
+                                            check=true;
                                             break;
                                         }
                                     }
                                 }
                             }
-                            bt[a][b].setBackground(Color.BLACK);
+                            if (check){
+                                matrandanh[a][b] = 1;
+                                bt[a][b].setEnabled(false);
+                                bt[a][b].setBackground(Color.BLACK);
+                            }
                         }
-                        try {
-                            oos.writeObject("caro," + a + "," + b);
-                            setEnableButton(false);
-                        } catch (Exception ie) {
-                            ie.printStackTrace();
+                        if (check){
+                            try {
+                                oos.writeObject("caro," + a + "," + b);
+                                setEnableButton(false);
+                            } catch (Exception ie) {
+                                ie.printStackTrace();
+                            }
+                            //thoigian.stop();
                         }
-                        thoigian.stop();
                     }
 
                 });
@@ -294,7 +312,7 @@ public class Client {
                     temp += "Khách:" + data[1] + '\n';
                     content.setText(temp);
                 } else if (data[0].equals("caro")) {
-                    thoigian.start();
+                    //thoigian.start();
                     second = 0;
                     minute = 0;
                     caro(data[1], data[2]);
@@ -307,7 +325,7 @@ public class Client {
                     second = 0;
                     minute = 0;
                 } else if (data[0].equals("checkwin")) {
-                    thoigian.stop();
+                    ///thoigian.stop();
                 }
             }
         } catch (Exception ie) {
@@ -328,7 +346,7 @@ public class Client {
         setEnableButton(true);
         second = 0;
         minute = 0;
-        thoigian.stop();
+        //thoigian.stop();
     }
 
     public void setVisiblePanel(JPanel pHienthi) {
@@ -347,11 +365,55 @@ public class Client {
             }
         }
     }
-
+    public boolean InBoard(int xPos,int yPos){
+        return (0<=xPos && xPos<x && 0<=yPos && yPos<y);
+    }
+    public boolean validMove(int xPos,int yPos,int xDirection,int yDirection){
+        if (!InBoard(xPos, yPos)) return false;
+        if (bt[xPos][yPos].getBackground()==Color.BLACK){
+            while (true){
+                if (InBoard(xPos+xDirection, yPos+yDirection)){
+                    xPos+=xDirection;
+                    yPos+=yDirection;
+                    if (bt[xPos][yPos].getBackground()==Color.RED){
+                        return true;
+                    }
+                    if (InBoard(xPos,yPos)&& bt[xPos][yPos].getBackground()!=Color.BLACK){
+                        break;
+                    }
+                } else{
+                    break;
+                }
+            }
+        }
+        return false;
+    }
     public void caro(String x, String y) {
         xx = Integer.parseInt(x);
         yy = Integer.parseInt(y);
         // danh dau vi tri danh
+        int dx[]={-1,-1,-1,0,0,1,1,1};
+        int dy[]={-1,0,1,-1,1,-1,0,1};
+        for (int direction=0;direction<8;direction++){
+            if (InBoard(xx+dx[direction], yy+dy[direction]) 
+                    && (validMove(xx+dx[direction], yy+dy[direction],dx[direction],dy[direction]))){
+                
+                int xPos=xx,yPos=yy,xDirection=dx[direction],yDirection=dy[direction];
+                while (true){
+                    matran[xPos][yPos] = 1;
+                    matrandanh[xPos][yPos] = 1;
+                    bt[xPos][yPos].setEnabled(false);
+                    bt[xPos][yPos].setBackground(Color.RED);
+                    xPos+=xDirection;
+                    yPos+=yDirection;
+                    if (!InBoard(xPos, yPos)) break;
+                    if (bt[xPos][yPos].getBackground()==Color.RED){
+                        break;
+                    }
+                }
+            }
+        }
+
         matran[xx][yy] = 1;
         matrandanh[xx][yy] = 1;
         bt[xx][yy].setEnabled(false);
