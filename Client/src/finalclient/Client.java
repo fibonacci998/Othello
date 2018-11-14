@@ -71,7 +71,7 @@ public class Client {
         f.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         //f.setVisible(true);
         f.setResizable(false);
-
+        f.setLocationRelativeTo(null);
         matran = new int[x][y];
         matrandanh = new int[x][y];
         menubar = new MenuBar();
@@ -345,7 +345,7 @@ public class Client {
         }
         
         try {
-            socket = new Socket("127.0.0.1", 1234);
+            socket = new Socket("192.168.0.104", 1234);
             System.out.println("Da ket noi toi server!");
             os = socket.getOutputStream();
             is = socket.getInputStream();
@@ -513,6 +513,8 @@ public class Client {
     }
 
     public static void main(String[] args) {
+        String input = JOptionPane.showInputDialog("Enter Input:");
+        JOptionPane.showMessageDialog(null, input);
         new Client();
     }
 

@@ -208,6 +208,8 @@ public class Sever {
         f.add(send);
         f.add(sp);
         f.setVisible(true);
+        f.setEnabled(false);
+        
         send.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -472,7 +474,13 @@ public class Sever {
         }
         return false;
     }
+    boolean checkFirst=false;
     public void caro(String x, String y) {
+        if (!checkFirst){
+            f.setEnabled(true);
+            checkFirst=true;
+        }
+        
         xx = Integer.parseInt(x);
         yy = Integer.parseInt(y);
         // danh dau vi tri danh
@@ -527,6 +535,8 @@ public class Sever {
     }
 
     public static void main(String[] args) {
+        String input = JOptionPane.showInputDialog("Enter Input:");
+        JOptionPane.showMessageDialog(null, input);
         new Sever();
     }
 
